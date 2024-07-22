@@ -748,6 +748,7 @@ export enum OAuthProviderType {
   GitHub = 'GitHub',
   Google = 'Google',
   OIDC = 'OIDC',
+  Universo = 'Universo',
 }
 
 export interface PasswordLimitsType {

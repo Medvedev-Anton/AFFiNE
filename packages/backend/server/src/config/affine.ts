@@ -117,40 +117,46 @@ AFFiNE.server.port = 3010;
 // AFFiNE.storages.avatar.provider = 'cloudflare-r2';
 //
 // /* OAuth Plugin */
-// AFFiNE.use('oauth', {
-//   providers: {
-//     github: {
-//       clientId: '',
-//       clientSecret: '',
-//       // See https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/authorizing-oauth-apps
-//       args: {
-//         scope: 'user',
-//       },
-//     },
-//     google: {
-//       clientId: '',
-//       clientSecret: '',
-//       args: {
-//         // See https://developers.google.com/identity/protocols/oauth2
-//         scope: 'openid email profile',
-//         promot: 'select_account',
-//         access_type: 'offline',
-//       },
-//     },
-//     oidc: {
-//       // OpenID Connect
-//       issuer: '',
-//       clientId: '',
-//       clientSecret: '',
-//       args: {
-//         scope: 'openid email profile',
-//         claim_id: 'preferred_username',
-//         claim_email: 'email',
-//         claim_name: 'name',
-//       },
-//     },
-//   },
-// });
+AFFiNE.use('oauth', {
+  providers: {
+    github: {
+      clientId: '',
+      clientSecret: '',
+      args: {
+        scope: 'user',
+      },
+    },
+    google: {
+      clientId: '',
+      clientSecret: '',
+      args: {
+        scope: 'openid email profile',
+        promot: 'select_account',
+        access_type: 'offline',
+      },
+    },
+    oidc: {
+      // OpenID Connect
+      issuer: '',
+      clientId: '',
+      clientSecret: '',
+      args: {
+        scope: 'openid email profile',
+        claim_id: 'preferred_username',
+        claim_email: 'email',
+        claim_name: 'name',
+      },
+    },
+    universo: {
+      clientId: '',
+      clientSecret: '',
+      args: {
+        scope: 'read write',
+        redirect_uri: 'http://localhost:3000/callback',
+      },
+    },
+  },
+});
 //
 // /* Copilot Plugin */
 // AFFiNE.use('copilot', {

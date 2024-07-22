@@ -28,6 +28,9 @@ const OAuthProviderMap: Record<
     // TODO(@catsjuice): Add OIDC icon
     icon: <GoogleDuotoneIcon />,
   },
+  [OAuthProviderType.Universo]: {
+    icon: <GoogleDuotoneIcon />, // Добавить иконку для Universo
+  },
 };
 
 export function OAuth({ redirectUri }: { redirectUri?: string | null }) {

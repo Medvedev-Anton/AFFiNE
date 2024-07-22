@@ -18,16 +18,23 @@ export interface OAuthOIDCProviderConfig extends OAuthProviderConfig {
   args?: OIDCArgs;
 }
 
+export interface OAuthUniversoProviderConfig extends OAuthProviderConfig {
+  issuer: string;
+  args?: OIDCArgs & { code_challenge_method: string; redirect_uri: string };
+}
+
 export enum OAuthProviderName {
   Google = 'google',
   GitHub = 'github',
   OIDC = 'oidc',
+  Universo = 'universo',
 }
 
 type OAuthProviderConfigMapping = {
   [OAuthProviderName.Google]: OAuthProviderConfig;
   [OAuthProviderName.GitHub]: OAuthProviderConfig;
   [OAuthProviderName.OIDC]: OAuthOIDCProviderConfig;
+  [OAuthProviderName.Universo]: OAuthUniversoProviderConfig;
 };
 
 export interface OAuthConfig {
