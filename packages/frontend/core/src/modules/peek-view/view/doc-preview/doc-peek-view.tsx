@@ -6,8 +6,8 @@ import { BlockSuiteEditor } from '@affine/core/components/blocksuite/block-suite
 import { useNavigateHelper } from '@affine/core/hooks/use-navigate-helper';
 import { PageNotFound } from '@affine/core/pages/404';
 import { DebugLogger } from '@affine/debug';
-import { Bound, type EdgelessRootService } from '@blocksuite/blocks';
-import { DisposableGroup } from '@blocksuite/global/utils';
+import { type EdgelessRootService } from '@blocksuite/blocks';
+import { Bound, DisposableGroup } from '@blocksuite/global/utils';
 import type { AffineEditorContainer } from '@blocksuite/presets';
 import type { DocMode } from '@toeverything/infra';
 import { DocsService, FrameworkScope, useService } from '@toeverything/infra';
@@ -26,6 +26,10 @@ function fitViewport(
   xywh?: `[${number},${number},${number},${number}]`
 ) {
   try {
+    if (!editor.host) {
+      throw new Error('editor host is not ready');
+    }
+
     const rootService =
       editor.host.std.spec.getService<EdgelessRootService>('affine:page');
     rootService.viewport.onResize();
@@ -113,6 +117,10 @@ export function DocPeekPreview({
     if (editor) {
       editor.updateComplete
         .then(() => {
+          if (!editor.host) {
+            return;
+          }
+
           const rootService = editor.host.std.spec.getService('affine:page');
           // doc change event inside peek view should be handled by peek view
           disposableGroup.add(

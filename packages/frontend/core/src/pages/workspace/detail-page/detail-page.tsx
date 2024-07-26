@@ -95,7 +95,6 @@ const DetailPageImpl = memo(function DetailPageImpl() {
 
   useEffect(() => {
     const disposable = AIProvider.slots.requestOpenWithChat.on(params => {
-      console.log(params);
       workbench.openSidebar();
       view.activeSidebarTab('chat');
 
@@ -110,9 +109,11 @@ const DetailPageImpl = memo(function DetailPageImpl() {
   useEffect(() => {
     if (isActiveView) {
       globalContext.docId.set(doc.id);
+      globalContext.isDoc.set(true);
 
       return () => {
         globalContext.docId.set(null);
+        globalContext.isDoc.set(false);
       };
     }
     return;
@@ -160,7 +161,7 @@ const DetailPageImpl = memo(function DetailPageImpl() {
       const editorHost = editor.host;
 
       // provide image proxy endpoint to blocksuite
-      editorHost.std.clipboard.use(
+      editorHost?.std.clipboard.use(
         customImageProxyMiddleware(runtimeConfig.imageProxyUrl)
       );
       ImageBlockService.setImageProxyURL(runtimeConfig.imageProxyUrl);
@@ -179,22 +180,22 @@ const DetailPageImpl = memo(function DetailPageImpl() {
 
       // provide page mode and updated date to blocksuite
       const pageService =
-        editorHost.std.spec.getService<PageRootService>('affine:page');
+        editorHost?.std.spec.getService<PageRootService>('affine:page');
       const disposable = new DisposableGroup();
-
-      doc.setMode(mode);
-      disposable.add(
-        pageService.slots.docLinkClicked.on(({ docId, blockId }) => {
-          return blockId
-            ? jumpToPageBlock(docCollection.id, docId, blockId)
-            : openPage(docCollection.id, docId);
-        })
-      );
-      disposable.add(
-        pageService.slots.tagClicked.on(({ tagId }) => {
-          jumpToTag(workspace.id, tagId);
-        })
-      );
+      if (pageService) {
+        disposable.add(
+          pageService.slots.docLinkClicked.on(({ docId, blockId }) => {
+            return blockId
+              ? jumpToPageBlock(docCollection.id, docId, blockId)
+              : openPage(docCollection.id, docId);
+          })
+        );
+        disposable.add(
+          pageService.slots.tagClicked.on(({ tagId }) => {
+            jumpToTag(workspace.id, tagId);
+          })
+        );
+      }
 
       setEditor(editor);
 
@@ -202,15 +203,7 @@ const DetailPageImpl = memo(function DetailPageImpl() {
         disposable.dispose();
       };
     },
-    [
-      doc,
-      mode,
-      jumpToPageBlock,
-      docCollection.id,
-      openPage,
-      jumpToTag,
-      workspace.id,
-    ]
+    [jumpToPageBlock, docCollection.id, openPage, jumpToTag, workspace.id]
   );
 
   return (

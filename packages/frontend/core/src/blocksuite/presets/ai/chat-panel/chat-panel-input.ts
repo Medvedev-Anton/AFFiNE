@@ -432,12 +432,18 @@ export class ChatPanelInput extends WithDisposable(LitElement) {
       items: [
         ...this.chatContextValue.items,
         {
+          id: '',
           role: 'user',
           content: content,
           createdAt: new Date().toISOString(),
           attachments,
         },
-        { role: 'assistant', content: '', createdAt: new Date().toISOString() },
+        {
+          id: '',
+          role: 'assistant',
+          content: '',
+          createdAt: new Date().toISOString(),
+        },
       ],
     });
 
@@ -453,6 +459,7 @@ export class ChatPanelInput extends WithDisposable(LitElement) {
         signal: abortController.signal,
         where: 'chat-panel',
         control: 'chat-send',
+        isRootSession: true,
       });
 
       if (stream) {
@@ -466,6 +473,24 @@ export class ChatPanelInput extends WithDisposable(LitElement) {
         }
 
         this.updateContext({ status: 'success' });
+
+        if (!this.chatContextValue.chatSessionId) {
+          this.updateContext({
+            chatSessionId: AIProvider.LAST_ROOT_SESSION_ID,
+          });
+        }
+
+        const { items } = this.chatContextValue;
+        const last = items[items.length - 1] as ChatMessage;
+        if (!last.id) {
+          const historyIds = await AIProvider.histories?.ids(
+            doc.collection.id,
+            doc.id,
+            { sessionId: this.chatContextValue.chatSessionId }
+          );
+          if (!historyIds || !historyIds[0]) return;
+          last.id = historyIds[0].messages.at(-1)?.id ?? '';
+        }
       }
     } catch (error) {
       this.updateContext({ status: 'error', error: error as AIError });

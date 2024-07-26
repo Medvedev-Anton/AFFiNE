@@ -2,22 +2,28 @@ import clsx from 'clsx';
 import type {
   ChangeEvent,
   CSSProperties,
-  FocusEventHandler,
   ForwardedRef,
   InputHTMLAttributes,
   KeyboardEvent,
   KeyboardEventHandler,
   ReactNode,
 } from 'react';
-import { forwardRef, useCallback } from 'react';
+import {
+  forwardRef,
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+} from 'react';
 
 import { input, inputWrapper } from './style.css';
 
 export type InputProps = {
   disabled?: boolean;
   onChange?: (value: string) => void;
-  onBlur?: FocusEventHandler<HTMLInputElement>;
+  onBlur?: (ev: FocusEvent & { currentTarget: HTMLInputElement }) => void;
   onKeyDown?: KeyboardEventHandler<HTMLInputElement>;
+  autoSelect?: boolean;
   noBorder?: boolean;
   status?: 'error' | 'success' | 'warning' | 'default';
   size?: 'default' | 'large' | 'extraLarge';
@@ -26,7 +32,7 @@ export type InputProps = {
   type?: HTMLInputElement['type'];
   inputStyle?: CSSProperties;
   onEnter?: () => void;
-} & Omit<InputHTMLAttributes<HTMLInputElement>, 'onChange' | 'size'>;
+} & Omit<InputHTMLAttributes<HTMLInputElement>, 'onChange' | 'size' | 'onBlur'>;
 
 export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
   {
@@ -42,24 +48,33 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
     endFix,
     onEnter,
     onKeyDown,
+    onBlur,
     autoFocus,
+    autoSelect,
     ...otherProps
   }: InputProps,
   upstreamRef: ForwardedRef<HTMLInputElement>
 ) {
-  const handleAutoFocus = useCallback(
-    (ref: HTMLInputElement | null) => {
-      if (ref) {
-        window.setTimeout(() => ref.focus(), 0);
-        if (typeof upstreamRef === 'function') {
-          upstreamRef(ref);
-        } else if (upstreamRef) {
-          upstreamRef.current = ref;
-        }
+  const inputRef = useRef<HTMLInputElement | null>(null);
+  useLayoutEffect(() => {
+    if (inputRef.current && (autoFocus || autoSelect)) {
+      inputRef.current?.focus();
+      if (autoSelect) {
+        inputRef.current?.select();
       }
-    },
-    [upstreamRef]
-  );
+    }
+  }, [autoFocus, autoSelect, upstreamRef]);
+
+  // use native blur event to get event after unmount
+  // don't use useLayoutEffect here, because the cleanup function will be called before unmount
+  useEffect(() => {
+    if (!onBlur) return;
+    inputRef.current?.addEventListener('blur', onBlur as any);
+    return () => {
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+      inputRef.current?.removeEventListener('blur', onBlur as any);
+    };
+  }, [onBlur]);
 
   return (
     <div
@@ -86,7 +101,16 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
           large: size === 'large',
           'extra-large': size === 'extraLarge',
         })}
-        ref={autoFocus ? handleAutoFocus : upstreamRef}
+        ref={ref => {
+          inputRef.current = ref;
+          if (upstreamRef) {
+            if (typeof upstreamRef === 'function') {
+              upstreamRef(ref);
+            } else {
+              upstreamRef.current = ref;
+            }
+          }
+        }}
         disabled={disabled}
         style={inputStyle}
         onChange={useCallback(

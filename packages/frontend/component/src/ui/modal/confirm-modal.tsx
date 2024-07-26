@@ -10,11 +10,12 @@ import { Modal } from './modal';
 import * as styles from './styles.css';
 
 export interface ConfirmModalProps extends ModalProps {
-  confirmButtonOptions?: ButtonProps;
+  confirmButtonOptions?: Omit<ButtonProps, 'children'>;
   onConfirm?: (() => void) | (() => Promise<void>);
   onCancel?: () => void;
-  cancelText?: string;
-  cancelButtonOptions?: ButtonProps;
+  confirmText?: React.ReactNode;
+  cancelText?: React.ReactNode;
+  cancelButtonOptions?: Omit<ButtonProps, 'children'>;
   reverseFooter?: boolean;
 }
 
@@ -22,6 +23,7 @@ export const ConfirmModal = ({
   children,
   confirmButtonOptions,
   // FIXME: we need i18n
+  confirmText,
   cancelText = 'Cancel',
   cancelButtonOptions,
   reverseFooter,
@@ -60,11 +62,21 @@ export const ConfirmModal = ({
         })}
       >
         <DialogTrigger asChild>
-          <Button onClick={onCancel} {...cancelButtonOptions}>
+          <Button
+            onClick={onCancel}
+            data-testid="confirm-modal-cancel"
+            {...cancelButtonOptions}
+          >
             {cancelText}
           </Button>
         </DialogTrigger>
-        <Button onClick={onConfirmClick} {...confirmButtonOptions}></Button>
+        <Button
+          onClick={onConfirmClick}
+          data-testid="confirm-modal-confirm"
+          {...confirmButtonOptions}
+        >
+          {confirmText}
+        </Button>
       </div>
     </Modal>
   );

@@ -4,7 +4,7 @@ import type { EditorHost } from '@blocksuite/block-std';
 import type { BlockModel } from '@blocksuite/store';
 import { lowerCase, omit } from 'lodash-es';
 
-type ElementModel = BlockSuite.SurfaceElementModelType;
+type ElementModel = BlockSuite.SurfaceElementModel;
 
 type AIActionEventName =
   | 'AI action invoked'
@@ -18,13 +18,15 @@ type AIActionEventProperties = {
     | 'AI action panel'
     | 'right side bar'
     | 'inline chat panel'
-    | 'AI result panel';
+    | 'AI result panel'
+    | 'AI chat block';
   module:
     | 'exit confirmation'
     | 'AI action panel'
     | 'AI chat panel'
     | 'inline chat panel'
-    | 'AI result panel';
+    | 'AI result panel'
+    | 'AI chat block';
   control:
     | 'stop button'
     | 'format toolbar'
@@ -139,6 +141,8 @@ function inferSegment(
     return 'AI result panel';
   } else if (event.options.where === 'chat-panel') {
     return 'right side bar';
+  } else if (event.options.where === 'ai-chat-block') {
+    return 'AI chat block';
   } else {
     return 'AI action panel';
   }
@@ -155,6 +159,8 @@ function inferModule(
     return 'AI result panel';
   } else if (event.options.where === 'inline-chat-panel') {
     return 'inline chat panel';
+  } else if (event.options.where === 'ai-chat-block') {
+    return 'AI chat block';
   } else {
     return 'AI action panel';
   }
